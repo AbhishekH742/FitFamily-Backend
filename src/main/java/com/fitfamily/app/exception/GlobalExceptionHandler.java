@@ -33,6 +33,36 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
 	}
 
+	@ExceptionHandler(FamilyAlreadyExistsException.class)
+	public ResponseEntity<ErrorResponse> handleFamilyAlreadyExists(FamilyAlreadyExistsException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.CONFLICT.value(),
+			"Family Conflict",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+	}
+
+	@ExceptionHandler(InvalidJoinCodeException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidJoinCode(InvalidJoinCodeException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.NOT_FOUND.value(),
+			"Invalid Join Code",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.NOT_FOUND.value(),
+			"User Not Found",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();

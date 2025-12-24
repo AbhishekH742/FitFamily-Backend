@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "families")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Family {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -24,22 +24,13 @@ public class User {
 	private String name;
 
 	@Column(nullable = false, unique = true)
-	private String email;
-
-	@Column(nullable = false)
-	private String password;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private Role role;
+	private String joinCode;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
-	@ManyToOne
-	@JoinColumn(name = "family_id")
-	private Family family;
-
 }
+
+
 
