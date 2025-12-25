@@ -93,6 +93,16 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 	}
 
+	@ExceptionHandler(FoodLogNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleFoodLogNotFound(FoodLogNotFoundException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.NOT_FOUND.value(),
+			"Food Log Not Found",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();

@@ -8,10 +8,9 @@ import com.fitfamily.app.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/food-logs")
@@ -51,6 +50,22 @@ public class FoodLogController {
 		);
 		
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	/**
+	 * Delete a food log entry
+	 * 
+	 * DELETE /food-logs/{id}
+	 * 
+	 * @param id The UUID of the food log to delete
+	 * @return 204 No Content on successful deletion
+	 */
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteFoodLog(@PathVariable UUID id) {
+		User currentUser = securityUtil.getCurrentUser();
+		foodLogService.deleteFoodLog(id, currentUser);
+		
+		return ResponseEntity.noContent().build();
 	}
 
 	// Response DTO

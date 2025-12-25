@@ -1,6 +1,7 @@
 package com.fitfamily.app.service;
 
 import com.fitfamily.app.dto.AddFoodLogRequest;
+import com.fitfamily.app.exception.FoodLogNotFoundException;
 import com.fitfamily.app.exception.FoodNotFoundException;
 import com.fitfamily.app.exception.FoodPortionNotFoundException;
 import com.fitfamily.app.exception.InvalidFoodPortionException;
@@ -14,6 +15,7 @@ import com.fitfamily.app.repository.FoodRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 public class FoodLogService {
@@ -64,6 +66,22 @@ public class FoodLogService {
 
 		// Save and return FoodLog
 		return foodLogRepository.save(foodLog);
+	}
+
+	/**
+	 * Delete a food log entry
+	 * 
+	 * @param foodLogId ID of the food log to delete
+	 * @param currentUser The current authenticated user
+	 * @throws FoodLogNotFoundException if food log not found or user is not the owner
+	 */
+	public void deleteFoodLog(UUID foodLogId, User currentUser) {
+		// Find food log by ID and user (ensures only owner can delete)
+		FoodLog foodLog = foodLogRepository.findByIdAndUser(foodLogId, currentUser)
+				.orElseThrow(() -> new FoodLogNotFoundException("Food log not found with ID: " + foodLogId + " or you do not have permission to delete it"));
+
+		// Delete the food log
+		foodLogRepository.delete(foodLog);
 	}
 
 }
