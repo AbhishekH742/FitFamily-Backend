@@ -63,6 +63,36 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
+	@ExceptionHandler(FoodNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleFoodNotFound(FoodNotFoundException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.NOT_FOUND.value(),
+			"Food Not Found",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
+	@ExceptionHandler(FoodPortionNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleFoodPortionNotFound(FoodPortionNotFoundException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.NOT_FOUND.value(),
+			"Food Portion Not Found",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+	}
+
+	@ExceptionHandler(InvalidFoodPortionException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidFoodPortion(InvalidFoodPortionException ex) {
+		ErrorResponse error = new ErrorResponse(
+			HttpStatus.BAD_REQUEST.value(),
+			"Invalid Food Portion",
+			ex.getMessage()
+		);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();
