@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: fitfamily-db
+    environment:
+      POSTGRES_DB: fitfamily
+      POSTGRES_USER: fitfamily
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql-setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitfamily"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fitfamily-network
+
+  # FitFamily Backend Application
+  backend:
+    build: .
+    container_name: fitfamily-backend
+    environment:
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/fitfamily
+      SPRING_DATASOURCE_USERNAME: fitfamily
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-changeme}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost}
+      
+      # Server Configuration
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+    networks:
+      - fitfamily-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  fitfamily-network:
+    driver: bridge
+

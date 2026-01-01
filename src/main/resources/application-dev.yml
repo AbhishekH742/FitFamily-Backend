@@ -1,0 +1,83 @@
+# Development Profile Configuration
+# Activate with: --spring.profiles.active=dev
+# Or environment variable: SPRING_PROFILES_ACTIVE=dev
+
+spring:
+  # H2 In-Memory Database (Development)
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:testdb}
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+
+  # H2 Console (Development Only)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false  # Only localhost access
+
+  # JPA Configuration (Development)
+  jpa:
+    hibernate:
+      # Auto-update schema on changes
+      ddl-auto: update
+    # Show SQL for debugging
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+        # Show SQL parameters
+        use_sql_comments: true
+        # Log slow queries (> 2 seconds)
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: 2000
+
+# Development JWT Configuration
+jwt:
+  # Short expiration for testing token refresh
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours
+
+# CORS Configuration (Development)
+cors:
+  # Allow common frontend development ports
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:4200,http://localhost:8081,http://localhost}
+
+# Health Check Configuration (Development)
+management:
+  endpoint:
+    health:
+      # Always show full health details in development
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        # Expose more endpoints in development for debugging
+        include: health,info,metrics,env
+
+# Logging Configuration (Development)
+logging:
+  level:
+    # Root level
+    root: INFO
+    # Spring Framework
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    # Hibernate
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    # Application logs
+    com.fitfamily.app: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: true
+

@@ -1,0 +1,118 @@
+# Production Profile Configuration
+# Activate with: --spring.profiles.active=prod
+# Or environment variable: SPRING_PROFILES_ACTIVE=prod
+
+spring:
+  # PostgreSQL Database (Production)
+  datasource:
+    # REQUIRED: Set these environment variables in production
+    url: ${DB_URL}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    
+    # Connection Pool Configuration (HikariCP)
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: ${DB_MIN_IDLE:5}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}  # 30 seconds
+      idle-timeout: ${DB_IDLE_TIMEOUT:600000}  # 10 minutes
+      max-lifetime: ${DB_MAX_LIFETIME:1800000}  # 30 minutes
+      leak-detection-threshold: ${DB_LEAK_DETECTION:60000}  # 60 seconds
+
+  # H2 Console (DISABLED in Production)
+  h2:
+    console:
+      enabled: false
+
+  # JPA Configuration (Production)
+  jpa:
+    hibernate:
+      # Only validate schema - DO NOT auto-create/update
+      # Use database migrations (Flyway/Liquibase) instead
+      ddl-auto: validate
+    # Hide SQL in production (performance & security)
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        # Batch operations for better performance
+        jdbc.batch_size: 20
+        order_inserts: true
+        order_updates: true
+        # Second-level cache (optional - configure if needed)
+        # cache.use_second_level_cache: true
+        # cache.region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+# Production JWT Configuration
+jwt:
+  # REQUIRED: Generate secure secret with: openssl rand -hex 32
+  # NEVER use the default development key!
+  secret: ${JWT_SECRET}
+  # Shorter expiration for better security (1 hour)
+  expiration: ${JWT_EXPIRATION:3600000}
+
+# CORS Configuration (Production)
+# IMPORTANT: Set CORS_ALLOWED_ORIGINS environment variable with your actual frontend URLs
+# Example: CORS_ALLOWED_ORIGINS=https://app.fitfamily.com,https://www.fitfamily.com
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+# Health Check Configuration (Production)
+management:
+  endpoint:
+    health:
+      # Hide sensitive health details in production
+      # Only show when authenticated (future enhancement)
+      show-details: when-authorized
+  endpoints:
+    web:
+      exposure:
+        # Only expose essential endpoints in production
+        include: health,info
+
+# Logging Configuration (Production)
+logging:
+  level:
+    # Root level - only warnings and errors
+    root: WARN
+    # Spring Framework - minimal logging
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    # Hibernate - errors only
+    org.hibernate: ERROR
+    # Application logs - info level
+    com.fitfamily.app: INFO
+  pattern:
+    # Structured logging for log aggregation (ELK, Splunk, etc.)
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  # Optional: Write logs to file (uncomment to enable)
+  # file:
+  #   name: ${LOG_FILE_PATH:/var/log/fitfamily/application.log}
+  #   max-size: 10MB
+  #   max-history: 30
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  
+  # Error handling (production - minimal information)
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  
+  # Compression (improve performance)
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+  
+  # SSL/TLS Configuration (if using embedded Tomcat with HTTPS)
+  # ssl:
+  #   enabled: ${SSL_ENABLED:false}
+  #   key-store: ${SSL_KEYSTORE_PATH}
+  #   key-store-password: ${SSL_KEYSTORE_PASSWORD}
+  #   key-store-type: ${SSL_KEYSTORE_TYPE:PKCS12}

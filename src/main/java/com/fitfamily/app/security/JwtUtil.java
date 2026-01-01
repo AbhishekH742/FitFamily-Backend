@@ -17,11 +17,18 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
+	// Annotate with @Value to prevent secret from being logged
 	@Value("${jwt.secret}")
 	private String secretKey;
 
 	@Value("${jwt.expiration}")
 	private long jwtExpiration;
+	
+	// Override toString to prevent accidental secret exposure in logs
+	@Override
+	public String toString() {
+		return "JwtUtil{secretKey=***REDACTED***, jwtExpiration=" + jwtExpiration + "}";
+	}
 
 	/**
 	 * Generate JWT token for a user

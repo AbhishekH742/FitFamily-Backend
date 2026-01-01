@@ -1,37 +1,88 @@
-# Application Configuration
+# ===================================================================
+# FitFamily Backend - Main Configuration
+# ===================================================================
+# This file contains common configuration shared across all profiles.
+# Profile-specific settings are in:
+#   - application-dev.yml  (Development)
+#   - application-prod.yml (Production)
+#
+# Activate a profile:
+#   - Command line: --spring.profiles.active=dev
+#   - Environment:  SPRING_PROFILES_ACTIVE=prod
+#   - IDE: Set active profile in run configuration
+#
+# Default profile (if none specified): Uses settings below + dev profile
+# ===================================================================
+
 spring:
   application:
     name: fitfamily-backend
+  
+  # Default Profile (if none specified)
+  # Development profile is used by default for convenience
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
-  # H2 Database Configuration (In-Memory for Development)
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
+  # Jackson JSON Configuration (applies to all profiles)
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+    default-property-inclusion: non_null
 
-  # H2 Console Configuration (Access at http://localhost:8080/h2-console)
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  # JPA & Hibernate Configuration
-  jpa:
-    hibernate:
-      ddl-auto: update          # Auto-create/update database schema
-    show-sql: true              # Log SQL statements
-    properties:
-      hibernate:
-        format_sql: true        # Format SQL for readability
-        dialect: org.hibernate.dialect.H2Dialect
-
-# Server Configuration
-server:
-  port: 8080
-
-# JWT Configuration
+# JWT Configuration (Common across profiles)
+# Profile-specific files can override these values
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expiration: 86400000  # 24 hours in milliseconds
+  # JWT_SECRET: REQUIRED for production
+  # Generate with: openssl rand -hex 32
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  
+  # Token expiration (can be overridden per profile)
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# CORS Configuration (Cross-Origin Resource Sharing)
+# Allows frontend applications to communicate with the backend
+cors:
+  # Comma-separated list of allowed origins
+  # Override in prod with: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost}
+
+# Server Configuration (Common)
+server:
+  port: ${SERVER_PORT:8080}
+  
+  # Graceful shutdown
+  shutdown: graceful
+  
+# Spring Actuator (Health checks, metrics)
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        # Expose health and info endpoints (secure by default)
+        include: health,info
+  endpoint:
+    health:
+      enabled: true
+      # Show details based on environment
+      # Development: always show, Production: when-authorized
+      show-details: ${HEALTH_SHOW_DETAILS:when-authorized}
+      # Enable readiness and liveness probes for Kubernetes/Docker
+      probes:
+        enabled: true
+  health:
+    # Database connectivity check
+    db:
+      enabled: true
+    # Disk space check
+    diskspace:
+      enabled: true
+      threshold: 10MB
+
+# Logging (Default - can be overridden by profiles)
+logging:
+  level:
+    root: INFO
+    com.fitfamily.app: INFO
 
